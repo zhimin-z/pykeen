@@ -78,7 +78,6 @@ PyKEEN
     :name: appendix
     :maxdepth: 2
 
-    unified_evaluation_workflow_support
     analysis/index
     references
 
