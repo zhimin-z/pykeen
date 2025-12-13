@@ -291,7 +291,8 @@ PyKEEN tracks execution time during training and evaluation:
     result = pipeline(model='TransE', dataset='Nations')
     
     # Training duration is tracked
-    training_seconds = result.losses['training_seconds']
+    training_seconds = result.train_seconds
+    evaluation_seconds = result.evaluate_seconds
 
 However, PyKEEN does not natively provide comprehensive resource monitoring for memory, FLOPs, power consumption, or carbon footprint. Time measurement is the primary performance metric tracked.
 
