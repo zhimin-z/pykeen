@@ -1,7 +1,15 @@
 Unified Evaluation Workflow Support
 ====================================
 
-This document maps PyKEEN's native capabilities to the Unified Evaluation Workflow, a standardized framework for evaluation harnesses across different modalities. A strategy is considered "supported" only if PyKEEN provides it natively in its full installation—meaning that once PyKEEN is fully installed, the strategy can be executed directly without implementing custom modules or integrating external libraries beyond those included in PyKEEN's optional dependencies.
+This document maps PyKEEN's capabilities to the Unified Evaluation Workflow, a standardized framework for evaluation harnesses across different modalities.
+
+Strategies are classified into three categories:
+
+- **Natively Supported**: Available immediately after installing PyKEEN (``pip install pykeen``), requires only import statements and minimal configuration (≤2 lines), no external dependencies beyond PyKEEN itself, and no custom implementation or glue code required.
+
+- **Supported via Third-Party Integration**: Requires installing one or more external packages (e.g., ``pykeen[transformers]``, ``pykeen[wandb]``), may require glue code (typically ≤10 lines), has documented integration patterns or official examples, and functionality is enabled through third-party tools in combination with PyKEEN.
+
+- **Not Supported**: Functionality is not available through PyKEEN, either natively or via documented third-party integration.
 
 Phase 0: Provisioning (The Runtime)
 -----------------------------------
@@ -9,7 +17,7 @@ Phase 0: Provisioning (The Runtime)
 Step A: Harness Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Strategy 1: PyPI Packages** ✅ **SUPPORTED**
+**Strategy 1: PyPI Packages** ✅ **NATIVELY SUPPORTED**
 
 PyKEEN can be installed directly from PyPI using pip:
 
@@ -25,7 +33,7 @@ Additionally, PyKEEN supports git-based installations:
 
 *Reference:* See :doc:`installation`
 
-**Strategy 2: Git Clone** ✅ **SUPPORTED**
+**Strategy 2: Git Clone** ✅ **NATIVELY SUPPORTED**
 
 PyKEEN supports manual installation from source code:
 
@@ -60,7 +68,7 @@ PyKEEN does not provide native authentication flows for evaluation platform serv
 
 PyKEEN focuses on local knowledge graph embedding model training and evaluation. It does not natively provide API authentication for commercial model providers or remote inference services.
 
-**Strategy 3: Repository Authentication** ⚠️ **PARTIALLY SUPPORTED**
+**Strategy 3: Repository Authentication** 🔌 **SUPPORTED VIA THIRD-PARTY INTEGRATION**
 
 PyKEEN supports token-based authentication with HuggingFace for accessing transformer models through its ``transformers`` extra:
 
@@ -68,7 +76,7 @@ PyKEEN supports token-based authentication with HuggingFace for accessing transf
 
     pip install pykeen[transformers]
 
-This enables authentication for accessing models and datasets from HuggingFace repositories. However, this requires the optional ``transformers`` dependency.
+This enables authentication for accessing models and datasets from HuggingFace repositories. This requires the optional ``transformers`` dependency and integration with HuggingFace's authentication system.
 
 *Reference:* The :class:`pykeen.nn.TextRepresentation` class uses ``transformers.AutoModel.from_pretrained`` which respects HuggingFace authentication tokens.
 
@@ -82,7 +90,7 @@ Step A: SUT Preparation
 
 PyKEEN is designed for local training and evaluation of knowledge graph embedding models. It does not natively support HTTP endpoints, SDK clients, or API wrappers for remotely hosted models.
 
-**Strategy 2: Model-in-Process (Local Inference)** ✅ **SUPPORTED**
+**Strategy 2: Model-in-Process (Local Inference)** ✅ **NATIVELY SUPPORTED**
 
 PyKEEN's core functionality is loading and training knowledge graph embedding models locally in memory:
 
@@ -102,7 +110,7 @@ PyKEEN supports 40+ knowledge graph embedding models including TransE, DistMult,
 
 *Reference:* See :mod:`pykeen.models` for all available models
 
-**Strategy 3: Algorithm Implementation (In-Memory Structures)** ✅ **SUPPORTED**
+**Strategy 3: Algorithm Implementation (In-Memory Structures)** ✅ **NATIVELY SUPPORTED**
 
 PyKEEN implements knowledge graph embedding algorithms as in-memory computational procedures. The framework provides:
 
@@ -121,7 +129,7 @@ PyKEEN is focused on knowledge graph embeddings and does not support reinforceme
 Step B: Benchmark Preparation (Inputs)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Strategy 1: Benchmark Dataset Preparation (Offline)** ✅ **SUPPORTED**
+**Strategy 1: Benchmark Dataset Preparation (Offline)** ✅ **NATIVELY SUPPORTED**
 
 PyKEEN provides 37 built-in datasets for knowledge graph embedding evaluation, including:
 
@@ -167,7 +175,7 @@ Step C: Benchmark Preparation (References)
 
 PyKEEN uses deterministic and embedding-based metrics for evaluation rather than learned judge models. It does not natively support training or loading specialized judge models for subjective evaluation.
 
-**Strategy 2: Ground Truth Preparation** ✅ **SUPPORTED**
+**Strategy 2: Ground Truth Preparation** ✅ **NATIVELY SUPPORTED**
 
 PyKEEN datasets include ground truth annotations in the form of knowledge graph triples. The evaluation framework:
 
@@ -200,7 +208,7 @@ Phase II: Execution (The Run)
 Step A: SUT Invocation
 ~~~~~~~~~~~~~~~~~~~~~~
 
-**Strategy 1: Batch Inference** ✅ **SUPPORTED**
+**Strategy 1: Batch Inference** ✅ **NATIVELY SUPPORTED**
 
 PyKEEN's core evaluation workflow executes batch inference over test triples:
 
@@ -240,7 +248,7 @@ Phase III: Assessment (The Score)
 Step A: Individual Scoring
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Strategy 1: Deterministic Measurement** ✅ **SUPPORTED**
+**Strategy 1: Deterministic Measurement** ✅ **NATIVELY SUPPORTED**
 
 PyKEEN implements extensive rank-based evaluation metrics that use deterministic calculations:
 
@@ -266,7 +274,7 @@ PyKEEN implements extensive rank-based evaluation metrics that use deterministic
 
 *Reference:* See :mod:`pykeen.metrics` and :doc:`tutorial/understanding_evaluation`
 
-**Strategy 2: Embedding Measurement** ✅ **SUPPORTED**
+**Strategy 2: Embedding Measurement** ✅ **NATIVELY SUPPORTED**
 
 As a knowledge graph embedding framework, PyKEEN's core functionality involves embedding-based measurements. All models:
 
@@ -282,26 +290,26 @@ The entire evaluation process is based on ranking entities according to embeddin
 
 PyKEEN uses deterministic ranking metrics and does not employ LLMs or classifiers as subjective evaluators.
 
-**Strategy 4: Performance Measurement** ⚠️ **PARTIALLY SUPPORTED**
+**Strategy 4: Performance Measurement** 🔌 **SUPPORTED VIA THIRD-PARTY INTEGRATION**
 
-PyKEEN tracks execution time during training and evaluation:
+PyKEEN natively tracks execution time during training and evaluation:
 
 .. code-block:: python
 
     result = pipeline(model='TransE', dataset='Nations')
     
-    # Training duration is tracked
+    # Training duration is natively tracked
     training_seconds = result.train_seconds
     evaluation_seconds = result.evaluate_seconds
 
-However, PyKEEN does not natively provide comprehensive resource monitoring for memory, FLOPs, power consumption, or carbon footprint. Time measurement is the primary performance metric tracked.
+For comprehensive resource monitoring (memory, FLOPs, power consumption, carbon footprint), PyKEEN can be integrated with third-party monitoring tools such as PyTorch profiler, memory_profiler, or carbon tracking libraries, though these integrations require custom implementation.
 
 *Reference:* Training time is reported in pipeline results
 
 Step B: Collective Aggregation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Strategy 1: Score Aggregation** ✅ **SUPPORTED**
+**Strategy 1: Score Aggregation** ✅ **NATIVELY SUPPORTED**
 
 PyKEEN aggregates per-instance ranks into benchmark-level metrics through:
 
@@ -336,12 +344,12 @@ Step A: Insight Presentation
 
 PyKEEN does not provide detailed step-by-step execution logs showing intermediate reasoning states or decision paths, as it evaluates knowledge graph embedding models rather than tool-using agents.
 
-**Strategy 2: Subgroup Analysis** ⚠️ **PARTIALLY SUPPORTED**
+**Strategy 2: Subgroup Analysis** ✅ **NATIVELY SUPPORTED**
 
-PyKEEN provides metrics stratified by:
+PyKEEN natively provides metrics stratified by:
 
 - Prediction side (head vs. tail)
-- Relation type (through custom analysis)
+- Ranking types (optimistic, pessimistic, realistic)
 
 .. code-block:: python
 
@@ -349,26 +357,26 @@ PyKEEN provides metrics stratified by:
     results = evaluator.evaluate(model=model, mapped_triples=test_triples)
     
     # Separate metrics for head and tail prediction
-    head_metrics = {k: v for k, v in results.data.items() if k[0] == 'head'}
-    tail_metrics = {k: v for k, v in results.data.items() if k[0] == 'tail'}
+    head_mrr = results.get_metric('head.realistic.inverse_harmonic_mean_rank')
+    tail_mrr = results.get_metric('tail.realistic.inverse_harmonic_mean_rank')
 
-However, demographic or domain-based stratification requires custom analysis outside the native evaluation framework.
+For additional stratification (by relation type, entity degree, or custom dimensions), custom analysis code is required.
 
 *Reference:* See :doc:`tutorial/understanding_evaluation`
 
-**Strategy 3: Chart Generation** ⚠️ **PARTIALLY SUPPORTED**
+**Strategy 3: Chart Generation** 🔌 **SUPPORTED VIA THIRD-PARTY INTEGRATION**
 
-PyKEEN provides basic plotting capabilities through the ``plotting`` extra:
+PyKEEN supports chart generation through the ``plotting`` extra:
 
 .. code-block:: bash
 
     pip install pykeen[plotting]
 
-This enables visualization of training losses and basic metric plots. However, advanced chart generation (radar charts, drift histograms, performance trends) requires custom implementation.
+This enables visualization of training losses and basic metric plots using matplotlib and seaborn. Advanced chart generation (radar charts, drift histograms, performance trends) can be implemented using these plotting libraries with PyKEEN's evaluation results.
 
 *Reference:* Install with ``pip install pykeen[plotting]`` for matplotlib and seaborn support
 
-**Strategy 4: Dashboard Creation** ⚠️ **PARTIALLY SUPPORTED**
+**Strategy 4: Dashboard Creation** 🔌 **SUPPORTED VIA THIRD-PARTY INTEGRATION**
 
 PyKEEN supports integration with external dashboard and tracking services through optional dependencies:
 
@@ -387,7 +395,7 @@ PyKEEN supports integration with external dashboard and tracking services throug
         result_tracker='wandb',  # or 'mlflow', 'neptune', 'tensorboard'
     )
 
-These trackers enable dashboard creation through third-party platforms but require their respective optional dependencies.
+These trackers enable dashboard creation through third-party platforms and require their respective optional dependencies.
 
 *Reference:* See :mod:`pykeen.trackers`
 
@@ -402,9 +410,9 @@ PyKEEN does not provide automated regression detection or alerting capabilities 
 Summary
 -------
 
-PyKEEN natively supports the following strategies in the Unified Evaluation Workflow:
+PyKEEN supports the following strategies in the Unified Evaluation Workflow:
 
-**Fully Supported (✅):**
+**Natively Supported (✅):**
 
 * Phase 0-A-1: PyPI Packages
 * Phase 0-A-2: Git Clone
@@ -416,14 +424,14 @@ PyKEEN natively supports the following strategies in the Unified Evaluation Work
 * Phase III-A-1: Deterministic Measurement
 * Phase III-A-2: Embedding Measurement
 * Phase III-B-1: Score Aggregation
+* Phase IV-A-2: Subgroup Analysis
 
-**Partially Supported (⚠️):**
+**Supported via Third-Party Integration (🔌):**
 
-* Phase 0-B-3: Repository Authentication (requires transformers extra)
-* Phase III-A-4: Performance Measurement (time only, not comprehensive)
-* Phase IV-A-2: Subgroup Analysis (limited stratification)
-* Phase IV-A-3: Chart Generation (requires plotting extra, limited capabilities)
-* Phase IV-A-4: Dashboard Creation (requires external service extras)
+* Phase 0-B-3: Repository Authentication (requires transformers extra for HuggingFace)
+* Phase III-A-4: Performance Measurement (time natively tracked; comprehensive monitoring via third-party tools)
+* Phase IV-A-3: Chart Generation (requires plotting extra: matplotlib, seaborn)
+* Phase IV-A-4: Dashboard Creation (requires tracker extras: MLflow, W&B, Neptune, TensorBoard)
 
 **Not Supported (❌):**
 
