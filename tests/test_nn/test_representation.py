@@ -9,9 +9,9 @@ from unittest.mock import MagicMock
 
 import numpy
 import pytest
-from PIL import Image
 import torch
 import unittest_templates
+from PIL import Image
 
 import pykeen.nn.message_passing
 import pykeen.nn.node_piece
